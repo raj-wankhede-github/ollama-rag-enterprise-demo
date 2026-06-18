@@ -1,111 +1,143 @@
 # Ollama RAG Enterprise Demo
 
-A production-ready **Retrieval-Augmented Generation (RAG)** application using **Ollama** for local LLM inference. Designed to run locally and in Docker for development and deployment.
+A production-ready Retrieval-Augmented Generation (RAG) application using Ollama for local LLM inference. It is designed for local development, Docker deployment, and document ingestion across multiple file formats.
 
-## 📋 Table of Contents
+## Table of Contents
 
+- [Overview](#overview)
 - [Features](#features)
 - [Architecture](#architecture)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Local Development](#local-development)
-- [How to Run Locally](#how-to-run-locally)
+- [Quick Start](#quick-start)
 - [API Endpoints](#api-endpoints)
+- [Supported File Formats](#supported-file-formats)
+- [File Upload Examples](#file-upload-examples)
+- [Docker Deployment](#docker-deployment)
 - [Testing](#testing)
 - [Configuration](#configuration)
+- [Python 3.13 Notes](#python-313-notes)
 - [Project Structure](#project-structure)
-- [Database Choices](#database-choices)
+- [Contributing](#contributing)
 - [Troubleshooting](#troubleshooting)
 
----
+## Overview
 
-## ✨ Features
+This project combines:
 
-- **Local RAG Pipeline** - Run everything locally using Ollama
-- **Multiple File Types** - Support for TXT, PDF, and Markdown files
-- **Vector Database** - Chroma for local embeddings (with Pinecone support)
-- **FastAPI** - Modern, async REST API with automatic documentation
-- **Docker Support** - Docker and Docker Compose for containerized deployment
-- **Streaming Responses** - Real-time streaming of generated responses
-- **Configuration Management** - Environment-based config for local/docker
-- **Comprehensive Logging** - Built-in logging for debugging
+- Document ingestion from local files
+- Text chunking and embedding generation
+- Chroma-backed vector search
+- Ollama-based answer generation
+- FastAPI endpoints for querying and ingestion
+- Local filesystem storage
 
----
+It supports local development and Docker tooling included for repeatable setup.
 
-## 🏗️ Architecture
+## Features
 
-### Local Development Flow
+- Local RAG pipeline using Ollama
+- FastAPI REST API with automatic docs
+- Docker and Docker Compose support
+- Streaming responses for query generation
+- Environment-based configuration
+- Built-in logging and storage utilities
+- Multi-format document ingestion
+- Source attribution for retrieved answers
+
+## Architecture
+
+### End-to-End Flow
+
+```text
+Document Upload -> File Processing -> Chunking -> Embedding Generation -> Vector Store (Chroma)
+                                                                          |
+                                                                          v
+Query Input -> Query Embedding -> Vector Search -> Context Retrieval -> LLM Generation (Ollama)
 ```
-Document Upload → File Processing → Chunking → Embedding Generation → Vector Store (Chroma)
-                                                                              ↓
-Query Input → Query Embedding → Vector Search → Context Retrieval → LLM Generation (Ollama)
-```
 
+### Core Components
 
-## 📦 Prerequisites
+- `src/config.py` - configuration management
+- `src/api/app.py` - FastAPI application
+- `src/rag/document_processor.py` - file parsing and normalization
+- `src/rag/embeddings.py` - embedding generation
+- `src/rag/vector_store.py` - vector database interface
+- `src/rag/pipeline.py` - RAG orchestration
+- `src/rag/llm.py` - Ollama integration
+- `src/utils/logger.py` - logging utilities
+- `src/utils/storage.py` - storage abstraction
 
-### Local Development
-- **Python 3.9+**
-- **Ollama** - Download from [ollama.ai](https://ollama.ai)
-- **pip** or **conda**
+## Prerequisites
 
+- Python 3.13+
+- Ollama installed and running
+- Git
+- `pip` or `conda`
 
-## 🚀 Installation
+Recommended Ollama models:
 
-### Step 1: Clone the Repository
+- `mistral`
+- `nomic-embed-text`
+
+## Installation
+
+### Clone the repository
+
 ```bash
 git clone https://github.com/yourusername/ollama-rag-enterprise-demo.git
 cd ollama-rag-enterprise-demo
 ```
 
-### Step 2: Create Virtual Environment
-```bash
-# Using venv
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+### Create a virtual environment
 
-# Or using conda
-conda create -n ollama-rag python=3.11
-conda activate ollama-rag
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# macOS/Linux
+python -m venv venv
+source venv/bin/activate
 ```
 
-### Step 3: Install Dependencies
+### Install dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### Step 4: Install Ollama
-1. Download Ollama from [ollama.ai](https://ollama.ai)
-2. Install and start the Ollama service
-3. Pull the required models:
+### Install Ollama models
+
 ```bash
 ollama pull mistral
 ollama pull nomic-embed-text
 ```
 
-### Step 5: Configure Environment
+### Configure environment
+
 ```bash
 cp .env.example .env
-# Edit .env with your configuration
 ```
 
----
+Edit `.env` as needed, or keep the defaults for local development.
 
-## 💻 Local Development
+## Local Development
 
-### Running the API Server
+### Start the API server
 
 ```bash
 python main.py
 ```
 
-The server will start at `http://localhost:8000`
+The server runs at:
 
-Access the API documentation at: `http://localhost:8000/docs`
+- `http://localhost:8000`
+- `http://localhost:8000/docs` for Swagger UI
 
-### Configuration for Local Development
+### Local environment example
 
-Edit `.env`:
 ```bash
 ENV=local
 DEBUG=true
@@ -115,57 +147,88 @@ STORAGE_TYPE=local
 VECTOR_DB_TYPE=chroma
 ```
 
----
+## Quick Start
 
-## 🎯 How to Run Locally
+### Five-minute setup
 
-### 1. Start Ollama
-```bash
-# On Windows/Mac
-# Ollama should auto-start as a service
+1. Install dependencies with `pip install -r requirements.txt`
+2. Pull models with `ollama pull mistral` and `ollama pull nomic-embed-text`
+3. Start the server with `python main.py`
+4. Open `http://localhost:8000/docs`
 
-# Or run manually (Linux)
-ollama serve
-```
-
-Verify Ollama is running:
-```bash
-curl http://localhost:11434/api/tags
-```
-
-### 2. Prepare Your Documents
-
-Place your documents in the `data/uploads` directory:
-```
-data/
-├── uploads/
-│   ├── document1.txt
-│   ├── document2.pdf
-│   └── document3.md
-└── chroma_db/
-```
-
-### 3. Run the Application
+### Quick test commands
 
 ```bash
-# Terminal 1: Start FastAPI server
-python main.py
+curl http://localhost:8000/health
 
-# Terminal 2: Test the API (in another terminal)
+echo "Python is a programming language" > test.txt
+curl -X POST http://localhost:8000/ingest -F "file=@test.txt"
+
 curl -X POST http://localhost:8000/query \
   -H "Content-Type: application/json" \
-  -d '{"query": "What is machine learning?"}'
+  -d '{"query": "What is Python?"}'
 ```
 
-### 4. Use the API
+### Quick action for Python 3.13.8 setups
 
-**Upload a document:**
+```bash
+python setup.py
+python main.py
+```
+
+This project includes compatibility updates for newer Python environments, including newer versions of `chromadb`, `pypdf`, `numpy`, `pydantic`, and `fastapi`.
+
+## API Endpoints
+
+### GET `/health`
+
+Health check endpoint.
+
+```bash
+curl http://localhost:8000/health
+```
+
+Example response:
+
+```json
+{
+  "status": "healthy",
+  "environment": "local",
+  "ollama_available": true
+}
+```
+
+### GET `/info`
+
+Returns application metadata, supported file types, and upload limits.
+
+```bash
+curl http://localhost:8000/info
+```
+
+### POST `/ingest`
+
+Upload and ingest a document.
+
 ```bash
 curl -X POST http://localhost:8000/ingest \
-  -F "file=@data/uploads/mydocument.txt"
+  -F "file=@document.txt"
 ```
 
-**Query the system:**
+Example response:
+
+```json
+{
+  "success": true,
+  "message": "Ingested 45 chunks",
+  "document_count": 45
+}
+```
+
+### POST `/query`
+
+Query the RAG system.
+
 ```bash
 curl -X POST http://localhost:8000/query \
   -H "Content-Type: application/json" \
@@ -176,414 +239,283 @@ curl -X POST http://localhost:8000/query \
   }'
 ```
 
-**Check health:**
-```bash
-curl http://localhost:8000/health
-```
-
----
-
-## 📡 API Endpoints
-
-### GET `/health`
-Health check endpoint
-```bash
-curl http://localhost:8000/health
-```
-
-**Response:**
-```json
-{
-  "status": "healthy",
-  "environment": "local",
-  "ollama_available": true
-}
-```
-
-### GET `/info`
-Application information
-```bash
-curl http://localhost:8000/info
-```
-
-### POST `/ingest`
-Upload and ingest a document
-
-**Request:**
-```bash
-curl -X POST http://localhost:8000/ingest \
-  -F "file=@document.txt"
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Ingested 45 chunks",
-  "document_count": 45
-}
-```
-
-### POST `/query`
-Query the RAG system
-
-**Request:**
-```json
-{
-  "query": "What is the document about?",
-  "top_k": 5,
-  "stream": false
-}
-```
-
-**Response:**
-```json
-{
-  "query": "What is the document about?",
-  "response": "The document discusses...",
-  "sources": [
-    {
-      "source": "document.txt",
-      "chunk_index": 0
-    }
-  ]
-}
-```
-
 ### DELETE `/documents/{doc_id}`
-Delete a document
 
----
+Delete an indexed document.
 
-## 🐳 Docker Deployment
+## Supported File Formats
 
-### Using Docker Compose (Recommended for Local)
+The `/ingest` endpoint accepts these formats:
+
+| Format | Extensions | Status | Typical Use |
+|--------|------------|--------|-------------|
+| PDF | `.pdf` | Supported | Reports, papers, documents |
+| CSV | `.csv` | Supported | Tabular data, exports |
+| Excel 2007+ | `.xlsx` | Supported | Modern spreadsheets |
+| Excel 97-2003 | `.xls` | Supported | Legacy spreadsheets |
+| Plain Text | `.txt` | Supported | Notes and text files |
+| Markdown | `.md`, `.markdown` | Supported | Docs and structured notes |
+
+### Processing behavior by format
+
+- PDF files are processed page by page.
+- CSV files are converted row by row with header preservation.
+- XLSX and XLS files are processed sheet by sheet.
+- TXT files are chunked directly as text.
+- Markdown files use header-aware chunking to preserve structure.
+
+### Validation and limits
+
+- Unsupported extensions are rejected with a clear error message.
+- File size is limited by `max_upload_size_mb` in `src/config.py`.
+- Default documented limit is 100MB.
+
+### Example unsupported-file response
+
+```json
+{
+  "detail": "Unsupported file type: .doc. Supported types: .csv, .md, .markdown, .pdf, .txt, .xls, .xlsx"
+}
+```
+
+## File Upload Examples
+
+### cURL
+
+```bash
+curl -X POST "http://localhost:8000/ingest" -F "file=@document.pdf"
+curl -X POST "http://localhost:8000/ingest" -F "file=@data.csv"
+curl -X POST "http://localhost:8000/ingest" -F "file=@spreadsheet.xlsx"
+```
+
+### Python
+
+```python
+import requests
+
+with open("document.pdf", "rb") as f:
+    response = requests.post("http://localhost:8000/ingest", files={"file": f})
+    print(response.json())
+```
+
+### JavaScript
+
+```javascript
+const formData = new FormData();
+formData.append("file", fileInput.files[0]);
+
+fetch("http://localhost:8000/ingest", {
+  method: "POST",
+  body: formData
+})
+  .then((response) => response.json())
+  .then((data) => console.log(data));
+```
+
+### FastAPI docs UI
+
+1. Start the server with `python main.py`
+2. Open `http://localhost:8000/docs`
+3. Open the `/ingest` endpoint
+4. Click Try it out
+5. Select a file and execute the request
+
+### Batch upload examples
+
+```bash
+for file in *.pdf; do
+  curl -X POST "http://localhost:8000/ingest" -F "file=@$file"
+done
+```
+
+## Docker Deployment
+
+### Docker Compose
 
 ```bash
 cd docker
 docker-compose up
 ```
 
-Access the API at: `http://localhost:8000`
-
-**What gets started:**
-- Ollama service
-- RAG application
-- Persistent volumes for data
-
-### Custom Docker Build
+### Docker build
 
 ```bash
 docker build -f docker/Dockerfile -t ollama-rag .
 docker run -p 8000:8000 -e OLLAMA_BASE_URL=http://host.docker.internal:11434 ollama-rag
 ```
 
----
+Docker starts the RAG application with the expected supporting services and persistent storage volumes.
 
-## 🧪 Testing
+## Testing
 
-### Run Automated Tests
+### Automated testing
 
 ```bash
 python test_rag.py
 ```
 
-This script:
-1. Tests query with empty knowledge base
-2. Creates a test document
-3. Ingests the document
-4. Queries with the ingested document
-5. Verifies results
+### Sample file generation
 
-### Manual Testing
-
-**Test 1: Upload Document**
 ```bash
-echo "Machine Learning is a subset of AI" > test.txt
-curl -X POST http://localhost:8000/ingest -F "file=@test.txt"
+python create_sample_files.py
+python create_sample_files.py test
 ```
 
-**Test 2: Query**
+Sample files covered by the repository include:
+
+- `sample_data.csv`
+- `sample_document.txt`
+- `sample_guide.md`
+
+### Manual smoke test
+
 ```bash
-curl -X POST http://localhost:8000/query \
-  -H "Content-Type: application/json" \
-  -d '{"query": "What is Machine Learning?"}'
+curl http://localhost:8000/health
+curl http://localhost:8000/info
 ```
 
-**Test 3: Stream Response**
-```bash
-curl -X POST http://localhost:8000/query \
-  -H "Content-Type: application/json" \
-  -d '{"query": "Explain AI", "stream": true}'
-```
+## Configuration
 
----
-
-## ⚙️ Configuration
-
-### Environment Variables
+### Environment variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `ENV` | local | Environment: local, docker |
-| `OLLAMA_BASE_URL` | http://localhost:11434 | Ollama service URL |
-| `OLLAMA_MODEL` | mistral | LLM model name |
-| `OLLAMA_EMBEDDING_MODEL` | nomic-embed-text | Embedding model name |
-| `VECTOR_DB_TYPE` | chroma | Vector database: chroma, pinecone |
-| `CHROMA_PERSIST_DIR` | ./data/chroma_db | Chroma database location |
-| `STORAGE_TYPE` | local | Storage: local |
-| `API_PORT` | 8000 | API server port |
-| `CHUNK_SIZE` | 1000 | Document chunk size |
-| `CHUNK_OVERLAP` | 200 | Chunk overlap size |
-| `TOP_K_RESULTS` | 5 | Top K results for retrieval |
-| `SIMILARITY_THRESHOLD` | 0.5 | Minimum similarity score |
+| `ENV` | `local` | Runtime environment |
+| `DEBUG` | `false` | Debug logging toggle |
+| `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama service URL |
+| `OLLAMA_MODEL` | `mistral` | Generation model |
+| `OLLAMA_EMBEDDING_MODEL` | `nomic-embed-text` | Embedding model |
+| `VECTOR_DB_TYPE` | `chroma` | Vector database type |
+| `CHROMA_PERSIST_DIR` | `./data/chroma_db` | Chroma storage path |
+| `STORAGE_TYPE` | `local` | Storage backend |
+| `API_PORT` | `8000` | API server port |
+| `CHUNK_SIZE` | `500` | Characters per chunk |
+| `CHUNK_OVERLAP` | `50` | Chunk overlap |
+| `TOP_K_RESULTS` | `5` | Retrieval top-k |
+| `SIMILARITY_THRESHOLD` | `0.5` | Minimum similarity score |
+| `max_upload_size_mb` | `100` | Max upload size in MB |
 
-### Database Configuration
+### Chroma notes
 
-The application supports **Chroma** as the vector database:
+Chroma is used because it is embedded, easy to run locally, and works well with persistent storage.
 
-**Chroma (Recommended)**
-- Embedded vector database
-- No setup required
-- Persistent storage in `./data/chroma_db`
-- Perfect for local development and docker
+## Python 3.13 Notes
 
-**Why Chroma for this project:**
-- ✅ No external dependencies
-- ✅ Lightweight and easy to run locally
-- ✅ Persistent storage support
-- ✅ Fast similarity search
-- ✅ Open source
+The repository includes a quick-action setup path for Python 3.13.8 and related dependency updates.
 
-**Future Support:**
-- Pinecone (cloud vector database)
-- PostgreSQL with pgvector extension
-
----
-
-## 📁 Project Structure
-
-```
-ollama-rag-enterprise-demo/
-├── src/
-│   ├── __init__.py
-│   ├── config.py              # Configuration management
-│   ├── api/
-│   │   ├── __init__.py
-│   │   └── app.py             # FastAPI application
-│   ├── rag/
-│   │   ├── __init__.py
-│   │   ├── pipeline.py        # Main RAG orchestrator
-│   │   ├── embeddings.py      # Embedding generation
-│   │   ├── vector_store.py    # Vector database interface
-│   │   ├── document_processor.py  # Document processing
-│   │   └── llm.py             # LLM interface (Ollama)
-│   └── utils/
-│       ├── __init__.py
-│       ├── logger.py          # Logging utilities
-│       └── storage.py         # Storage abstraction (Local)
-├── data/
-│   ├── uploads/               # Local document uploads
-│   └── chroma_db/             # Vector database storage
-├── docker/
-│   ├── Dockerfile
-│   └── docker-compose.yml
-├── tests/
-│   └── (test files)
-├── main.py                    # Entry point for local server
-├── test_rag.py               # RAG testing script
-├── requirements.txt           # Python dependencies
-├── .env.example              # Example environment variables
-└── README.md                 # This file
-```
-
----
-
-## 🗄️ Database Choices
-
-### Vector Database: Chroma
-
-**Why Chroma:**
-- **Embedded**: Runs in-process, no separate server needed
-- **Lightweight**: Great for local and docker environments
-- **Persistent**: Stores embeddings locally
-- **Fast**: DuckDB backend for efficient similarity search
-- **Open Source**: Community-driven, transparent
-
-**Alternatives Considered:**
-
-| Database | Pros | Cons | Use Case |
-|----------|------|------|----------|
-| **Pinecone** | Fully managed, scalable | Paid service | Large-scale production |
-| **Weaviate** | Open source, powerful | More complex setup | Enterprise deployments |
-| **FAISS** | Fast, efficient | Requires rebuilding | Research/batch processing |
-| **PostgreSQL + pgvector** | SQL + vectors | Extra infrastructure | Existing Postgres setups |
-
-**Chroma is optimal for this demo because:**
-1. No external services required
-2. Works well in local and docker environments
-3. Minimal operational overhead
-4. Easy local development
-5. Simple persistent local storage
-
----
-
-## 🔧 Troubleshooting
-
-### Issue: "Ollama not available"
-
-**Solution:**
-```bash
-# Check if Ollama is running
-curl http://localhost:11434/api/tags
-
-# Start Ollama
-ollama serve
-
-# Verify connection
-python -c "from src.rag.llm import LLM; llm = LLM(); print('Connected!' if llm.is_available() else 'Not available')"
-```
-
-### Issue: Out of memory errors
-
-**Solution:**
-```bash
-# Reduce chunk size in .env
-CHUNK_SIZE=500
-CHUNK_OVERLAP=100
-
-# Use smaller embedding model
-OLLAMA_EMBEDDING_MODEL=all-minilm
-```
-
-### Issue: Slow query performance
-
-**Solution:**
-1. Increase `TOP_K_RESULTS` in `.env`
-2. Lower `SIMILARITY_THRESHOLD` to get more results
-3. Optimize chunk size for your document type
-4. Use faster Ollama model
-
-### Issue: CORS errors in browser
-
-**Solution:**
-Already configured in FastAPI app with `CORSMiddleware`:
-```python
-# Allows all origins for demo
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    ...
-)
-
-# For production, restrict origins:
-allow_origins=["https://yourdomain.com"],
-```
-
----
-
-## 📝 Example Workflows
-
-### Workflow 1: Document Ingestion and Query
+### Recommended setup
 
 ```bash
-# 1. Start the server
+python setup.py
+python verify_installation.py
 python main.py
-
-# 2. Ingest a document
-curl -X POST http://localhost:8000/ingest \
-  -F "file=@path/to/document.txt"
-
-# 3. Query the document
-curl -X POST http://localhost:8000/query \
-  -H "Content-Type: application/json" \
-  -d '{"query": "What is the main topic?"}'
-
-# 4. Get the response
-# Response includes the generated answer and source references
 ```
 
-### Workflow 2: Docker Development
+### Common fixes
 
-```bash
-# 1. Navigate to docker directory
-cd docker
+- Reinstall dependencies with `pip install --upgrade -r requirements.txt`
+- Recreate the virtual environment if imports fail
+- If Chroma import issues appear, reinstall `chromadb` and clear `data/chroma_db`
 
-# 2. Start services
-docker-compose up
+## Project Structure
 
-# 3. Wait for services to start (~30 seconds)
-
-# 4. Ingest document
-curl -X POST http://localhost:8000/ingest \
-  -F "file=@../data/document.txt"
-
-# 5. Query
-curl -X POST http://localhost:8000/query \
-  -H "Content-Type: application/json" \
-  -d '{"query": "Your question here"}'
-
-# 6. Stop services
-docker-compose down
+```text
+ollama-rag-enterprise-demo/
+├── cli.py
+├── main.py
+├── setup.py
+├── test_rag.py
+├── verify_installation.py
+├── requirements.txt
+├── README.md
+├── data/
+├── docker/
+├── src/
+│   ├── config.py
+│   ├── api/
+│   ├── rag/
+│   └── utils/
+└── tests/
 ```
 
----
+## Contributing
 
-## 📊 Performance Metrics
+Thank you for contributing to the project.
 
-Approximate performance on local machine (Intel i7, 16GB RAM):
+### Workflow
 
-- **Document ingestion**: 100 pages → ~10 seconds
-- **Query latency**: Retrieve + Generate → 5-15 seconds
-- **Embedding generation**: Per 1000 tokens → 200ms
-- **Vector search**: Top 5 results → 50ms
-- **LLM inference**: Per query → 3-10 seconds
-
----
-
-## 🚀 Next Steps
-
-1. **Customize models**: Change `OLLAMA_MODEL` to suite your needs
-2. **Implement authentication**: Add JWT tokens to API
-3. **Add caching**: Implement Redis for query results
-4. **Scale vector DB**: Switch to managed Pinecone for production
-5. **Add monitoring**: Add runtime and request metrics
-6. **Enable fine-tuning**: Create custom embeddings for your domain
-
----
-
-## 📄 License
-
-MIT License - Feel free to use this project for commercial or personal use.
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please:
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Submit a pull request
+4. Run tests
+5. Commit with a clear message
+6. Push to your fork
+7. Open a pull request
 
----
+### Development expectations
 
-## 💬 Support
+- Follow Python PEP 8 style
+- Use type hints where practical
+- Add docstrings to public functions and classes
+- Update documentation when behavior changes
+- Run `python test_rag.py` and `pytest tests/` when relevant
 
-For issues, questions, or suggestions:
-- Open an issue on GitHub
-- Check existing documentation
-- Review the troubleshooting section
+### Areas for contribution
 
----
+- Additional vector databases
+- More document formats
+- Better error handling
+- More tests
+- UI improvements
+- Authentication support
 
-## 🎓 Resources
+## Troubleshooting
 
-- [Ollama Documentation](https://github.com/ollama/ollama)
-- [FastAPI Documentation](https://fastapi.tiangolo.com)
-- [Chroma Documentation](https://docs.trychroma.com)
-- [RAG Explained](https://research.ibm.com/blog/retrieval-augmented-generation-RAG)
+### Ollama is not reachable
 
----
+- Confirm the Ollama service is running
+- Check `OLLAMA_BASE_URL`
+- Verify the models have been pulled
 
-**Made with ❤️ for AI builders**
+### Upload returns unsupported file type
+
+- Use one of the supported extensions: `.pdf`, `.csv`, `.xlsx`, `.xls`, `.txt`, `.md`, `.markdown`
+- Confirm the filename extension matches the actual file type
+
+### CSV files appear empty
+
+- Make sure the first row contains headers
+- Use UTF-8 encoding
+- Check the delimiter is comma-separated
+
+### Excel files fail to process
+
+- Try `.xlsx` if possible
+- Remove sheet protection or unusual formatting
+- Confirm the workbook is not corrupted
+
+### Import or dependency issues
+
+- Reinstall dependencies with `pip install -r requirements.txt`
+- Recreate the virtual environment
+- Run `python verify_installation.py`
+
+## Reference Notes
+
+The following standalone markdown guides were consolidated into this README:
+
+- Quick start instructions
+- Quick reference commands
+- File upload guide
+- Supported file formats guide
+- File format implementation summary
+- Multi-format summary
+- Python 3.13 setup notes
+- Contribution guidelines
+- Sample file usage notes
+
+## Status
+
+- Complete and tested
+- Multi-format ingestion enabled
+- README is now the single markdown documentation file in the workspace
