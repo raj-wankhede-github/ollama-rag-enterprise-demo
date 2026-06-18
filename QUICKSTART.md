@@ -96,7 +96,6 @@ docker-compose up
 ## Next Steps
 
 - Read [README.md](README.md) for full documentation
-- Deploy to AWS: Follow [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md)
 - Test the CLI: `python cli.py --help`
 - Upload your own documents!
 
@@ -123,10 +122,6 @@ python cli.py ingest path/to/file       # CLI ingest
 # Docker
 docker-compose up                       # Start with Ollama
 docker-compose down                     # Stop services
-
-# AWS Deployment
-python build_lambda.py                  # Build Lambda package
-aws cloudformation deploy ...           # Deploy to AWS
 ```
 
 ---
