@@ -1,6 +1,6 @@
 """
 Configuration management for Ollama RAG application.
-Supports both local development and AWS Lambda deployment.
+Supports local and docker deployment.
 """
 
 import os
@@ -12,7 +12,6 @@ from enum import Enum
 class Environment(str, Enum):
     """Application environment types"""
     LOCAL = "local"
-    AWS = "aws"
     DOCKER = "docker"
 
 
@@ -33,13 +32,8 @@ class Config:
     vector_db_type: str = os.getenv("VECTOR_DB_TYPE", "chroma")  # chroma, pinecone, weaviate
     chroma_persist_dir: str = os.getenv("CHROMA_PERSIST_DIR", "./data/chroma_db")
     
-    # AWS Configuration
-    aws_region: str = os.getenv("AWS_REGION", "us-east-1")
-    aws_s3_bucket: str = os.getenv("AWS_S3_BUCKET", "")
-    aws_dynamodb_table: str = os.getenv("AWS_DYNAMODB_TABLE", "rag-embeddings")
-    
     # File Storage
-    storage_type: str = os.getenv("STORAGE_TYPE", "local")  # local or s3
+    storage_type: str = os.getenv("STORAGE_TYPE", "local")  # local
     local_upload_dir: str = os.getenv("LOCAL_UPLOAD_DIR", "./data/uploads")
     
     # API Configuration
@@ -67,26 +61,22 @@ class Config:
     max_upload_size_mb: int = int(os.getenv("MAX_UPLOAD_SIZE_MB", "50"))
     request_timeout_seconds: int = int(os.getenv("REQUEST_TIMEOUT_SECONDS", "300"))
     
-    def is_aws(self) -> bool:
-        """Check if running in AWS environment"""
-        return self.environment.lower() == "aws"
-    
     def is_local(self) -> bool:
         """Check if running locally"""
         return self.environment.lower() == "local"
+
+    def is_docker(self) -> bool:
+        """Check if running in docker environment"""
+        return self.environment.lower() == "docker"
     
     def validate(self) -> None:
         """Validate configuration"""
-        if self.is_aws():
-            if not self.aws_s3_bucket:
-                raise ValueError("AWS_S3_BUCKET must be set in AWS environment")
-        
         if self.vector_db_type == "pinecone":
             if not os.getenv("PINECONE_API_KEY"):
                 raise ValueError("PINECONE_API_KEY must be set when using Pinecone")
         
         # Ensure upload directory exists for local storage
-        if self.storage_type == "local" and self.is_local():
+        if self.storage_type == "local" and (self.is_local() or self.is_docker()):
             os.makedirs(self.local_upload_dir, exist_ok=True)
 
 

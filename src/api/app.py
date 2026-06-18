@@ -43,7 +43,6 @@ except Exception as e:
 # Initialize storage
 storage = get_storage_provider(
     config.storage_type,
-    bucket_name=config.aws_s3_bucket if config.is_aws() else None,
     base_dir=config.local_upload_dir
 )
 
@@ -146,8 +145,7 @@ async def ingest_document(file: UploadFile = File(...)):
         try:
             # Upload to storage
             storage_key = f"documents/{file.filename}"
-            if config.storage_type == "s3":
-                storage.upload_file(tmp_path, storage_key)
+            storage.upload_file(tmp_path, storage_key)
             
             # Ingest into RAG
             result = rag_pipeline.ingest_document(tmp_path)

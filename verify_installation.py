@@ -16,8 +16,6 @@ EXPECTED_VERSIONS = {
     "requests": ("2.32.4", "requests"),
     "chromadb": ("0.6.1", "chromadb"),
     "numpy": ("2.1.3", "numpy"),
-    "boto3": ("1.43.32", "boto3"),
-    "botocore": ("1.43.32", "botocore"),
     "python-dotenv": ("1.0.1", "dotenv"),  # package name differs from import name
     "pypdf": ("5.0.1", "pypdf"),
 }
@@ -127,7 +125,6 @@ def verify_imports() -> int:
         ("requests", "get"),
         ("chromadb", "Client"),
         ("numpy", "array"),
-        ("boto3", "client"),
         ("pypdf", "PdfReader"),
     ]
     

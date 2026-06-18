@@ -1,6 +1,6 @@
 # Ollama RAG Enterprise Demo
 
-A production-ready **Retrieval-Augmented Generation (RAG)** application using **Ollama** for local LLM inference. Designed to run locally and scale seamlessly to **AWS Lambda, API Gateway, and S3** for enterprise deployments.
+A production-ready **Retrieval-Augmented Generation (RAG)** application using **Ollama** for local LLM inference. Designed to run locally and in Docker for development and deployment.
 
 ## 📋 Table of Contents
 
@@ -11,7 +11,6 @@ A production-ready **Retrieval-Augmented Generation (RAG)** application using **
 - [Local Development](#local-development)
 - [How to Run Locally](#how-to-run-locally)
 - [API Endpoints](#api-endpoints)
-- [AWS Deployment](#aws-deployment)
 - [Testing](#testing)
 - [Configuration](#configuration)
 - [Project Structure](#project-structure)
@@ -23,14 +22,12 @@ A production-ready **Retrieval-Augmented Generation (RAG)** application using **
 ## ✨ Features
 
 - **Local RAG Pipeline** - Run everything locally using Ollama
-- **Serverless Compatible** - Deploy to AWS Lambda with API Gateway
 - **Multiple File Types** - Support for TXT, PDF, and Markdown files
 - **Vector Database** - Chroma for local embeddings (with Pinecone support)
-- **Cloud Storage** - S3 integration for document storage
 - **FastAPI** - Modern, async REST API with automatic documentation
 - **Docker Support** - Docker and Docker Compose for containerized deployment
 - **Streaming Responses** - Real-time streaming of generated responses
-- **Configuration Management** - Environment-based config for local/AWS
+- **Configuration Management** - Environment-based config for local/docker
 - **Comprehensive Logging** - Built-in logging for debugging
 
 ---
@@ -44,14 +41,6 @@ Document Upload → File Processing → Chunking → Embedding Generation → Ve
 Query Input → Query Embedding → Vector Search → Context Retrieval → LLM Generation (Ollama)
 ```
 
-### AWS Deployment Flow
-```
-API Gateway → Lambda Function → S3 (Documents) + Chroma (Vectors) → Ollama (Remote or Local)
-                                     ↓
-                              DynamoDB (Metadata)
-```
-
----
 
 ## 📦 Prerequisites
 
@@ -60,13 +49,6 @@ API Gateway → Lambda Function → S3 (Documents) + Chroma (Vectors) → Ollama
 - **Ollama** - Download from [ollama.ai](https://ollama.ai)
 - **pip** or **conda**
 
-### AWS Deployment
-- **AWS Account** with appropriate permissions
-- **AWS CLI** configured
-- **S3 Bucket** for document storage
-- **Lambda Execution Role** with S3 and DynamoDB access
-
----
 
 ## 🚀 Installation
 
@@ -273,100 +255,6 @@ Delete a document
 
 ---
 
-## ☁️ AWS Deployment
-
-### Architecture Overview
-
-```
-┌─────────────┐
-│  API Client │
-└──────┬──────┘
-       │
-┌──────▼──────────────┐
-│  API Gateway        │ (Entry point)
-└──────┬──────────────┘
-       │
-┌──────▼──────────────┐
-│  Lambda Function    │ (Compute)
-│  - Query Processing │
-│  - Document Ingest  │
-└──────┬──────────────┘
-       │
-   ┌───┴────────────────┬─────────────────┐
-   │                    │                 │
-┌──▼────────┐  ┌───────▼─────┐  ┌────────▼────┐
-│ S3 Bucket │  │ DynamoDB    │  │ Chroma DB   │
-│ Documents │  │ Metadata    │  │ Embeddings  │
-└───────────┘  └─────────────┘  └─────────────┘
-```
-
-### Step 1: Prepare for Deployment
-
-```bash
-# Create an S3 bucket
-aws s3 mb s3://my-rag-documents
-
-# Build Lambda package
-python build_lambda.py
-```
-
-### Step 2: Deploy CloudFormation Stack
-
-```bash
-# Upload lambda function to S3
-aws s3 cp lambda-function.zip s3://my-rag-documents/
-
-# Deploy CloudFormation template
-aws cloudformation deploy \
-  --template-file aws/cloudformation-template.yaml \
-  --stack-name rag-stack \
-  --parameter-overrides S3BucketName=my-rag-documents \
-  --capabilities CAPABILITY_IAM \
-  --region us-east-1
-```
-
-### Step 3: Get the API Endpoint
-
-```bash
-aws cloudformation describe-stacks \
-  --stack-name rag-stack \
-  --query 'Stacks[0].Outputs[?OutputKey==`ApiEndpoint`].OutputValue' \
-  --output text
-```
-
-### Step 4: Use the AWS Deployment
-
-```bash
-API_ENDPOINT=$(aws cloudformation describe-stacks \
-  --stack-name rag-stack \
-  --query 'Stacks[0].Outputs[?OutputKey==`ApiEndpoint`].OutputValue' \
-  --output text)
-
-# Query the system
-curl -X POST ${API_ENDPOINT}/query \
-  -H "Content-Type: application/json" \
-  -d '{"query": "What is this about?"}'
-```
-
-### AWS Configuration in `.env`
-
-```bash
-ENV=aws
-STORAGE_TYPE=s3
-AWS_S3_BUCKET=my-rag-documents
-AWS_DYNAMODB_TABLE=rag-embeddings
-AWS_REGION=us-east-1
-VECTOR_DB_TYPE=chroma
-```
-
-### Lambda Cold Start Optimization
-
-- Use Lambda Layers for dependencies (included in CloudFormation)
-- Configure Lambda memory to 512MB minimum
-- Use provisioned concurrency for predictable performance
-
----
-
 ## 🐳 Docker Deployment
 
 ### Using Docker Compose (Recommended for Local)
@@ -437,13 +325,13 @@ curl -X POST http://localhost:8000/query \
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `ENV` | local | Environment: local, aws, docker |
+| `ENV` | local | Environment: local, docker |
 | `OLLAMA_BASE_URL` | http://localhost:11434 | Ollama service URL |
 | `OLLAMA_MODEL` | mistral | LLM model name |
 | `OLLAMA_EMBEDDING_MODEL` | nomic-embed-text | Embedding model name |
 | `VECTOR_DB_TYPE` | chroma | Vector database: chroma, pinecone |
 | `CHROMA_PERSIST_DIR` | ./data/chroma_db | Chroma database location |
-| `STORAGE_TYPE` | local | Storage: local or s3 |
+| `STORAGE_TYPE` | local | Storage: local |
 | `API_PORT` | 8000 | API server port |
 | `CHUNK_SIZE` | 1000 | Document chunk size |
 | `CHUNK_OVERLAP` | 200 | Chunk overlap size |
@@ -458,11 +346,11 @@ The application supports **Chroma** as the vector database:
 - Embedded vector database
 - No setup required
 - Persistent storage in `./data/chroma_db`
-- Perfect for local development and Lambda
+- Perfect for local development and docker
 
 **Why Chroma for this project:**
 - ✅ No external dependencies
-- ✅ Works in Lambda (< 512MB memory)
+- ✅ Lightweight and easy to run locally
 - ✅ Persistent storage support
 - ✅ Fast similarity search
 - ✅ Open source
@@ -490,30 +378,22 @@ ollama-rag-enterprise-demo/
 │   │   ├── vector_store.py    # Vector database interface
 │   │   ├── document_processor.py  # Document processing
 │   │   └── llm.py             # LLM interface (Ollama)
-│   ├── aws/
-│   │   ├── __init__.py
-│   │   └── lambda_handler.py  # AWS Lambda handler
 │   └── utils/
 │       ├── __init__.py
 │       ├── logger.py          # Logging utilities
-│       └── storage.py         # Storage abstraction (Local/S3)
+│       └── storage.py         # Storage abstraction (Local)
 ├── data/
 │   ├── uploads/               # Local document uploads
 │   └── chroma_db/             # Vector database storage
 ├── docker/
 │   ├── Dockerfile
 │   └── docker-compose.yml
-├── aws/
-│   ├── cloudformation-template.yaml  # AWS CloudFormation
-│   ├── deploy.sh              # Linux/Mac deployment script
-│   └── deploy.bat             # Windows deployment script
 ├── tests/
 │   └── (test files)
 ├── main.py                    # Entry point for local server
 ├── test_rag.py               # RAG testing script
 ├── requirements.txt           # Python dependencies
 ├── .env.example              # Example environment variables
-├── build_lambda.py           # Lambda package builder
 └── README.md                 # This file
 ```
 
@@ -525,8 +405,8 @@ ollama-rag-enterprise-demo/
 
 **Why Chroma:**
 - **Embedded**: Runs in-process, no separate server needed
-- **Lightweight**: Perfect for Lambda environments (small memory footprint)
-- **Persistent**: Stores embeddings locally or in S3
+- **Lightweight**: Great for local and docker environments
+- **Persistent**: Stores embeddings locally
 - **Fast**: DuckDB backend for efficient similarity search
 - **Open Source**: Community-driven, transparent
 
@@ -541,10 +421,10 @@ ollama-rag-enterprise-demo/
 
 **Chroma is optimal for this demo because:**
 1. No external services required
-2. Works perfectly with AWS Lambda
+2. Works well in local and docker environments
 3. Minimal operational overhead
 4. Easy local development
-5. Can scale with S3 for persistence
+5. Simple persistent local storage
 
 ---
 
@@ -574,9 +454,6 @@ CHUNK_OVERLAP=100
 
 # Use smaller embedding model
 OLLAMA_EMBEDDING_MODEL=all-minilm
-
-# Increase Lambda memory
-# In CloudFormation: LambdaMemory: 1024 (or higher)
 ```
 
 ### Issue: Slow query performance
@@ -586,33 +463,6 @@ OLLAMA_EMBEDDING_MODEL=all-minilm
 2. Lower `SIMILARITY_THRESHOLD` to get more results
 3. Optimize chunk size for your document type
 4. Use faster Ollama model
-
-### Issue: File not found error on Lambda
-
-**Solution:**
-```bash
-# Ensure file paths use S3 URIs
-# Update storage configuration in Lambda environment
-
-# Check S3 permissions
-aws s3 ls s3://your-bucket/
-
-# Verify Lambda execution role has S3 access
-aws iam list-attached-role-policies --role-name rag-lambda-role
-```
-
-### Issue: Lambda timeout
-
-**Solution:**
-```bash
-# Increase Lambda timeout in CloudFormation template
-LambdaTimeout: 900  # 15 minutes
-
-# Or optimize LLM inference time
-# - Use faster model: mistral vs llama2
-# - Reduce context length
-# - Cache frequently used queries
-```
 
 ### Issue: CORS errors in browser
 
@@ -653,35 +503,7 @@ curl -X POST http://localhost:8000/query \
 # Response includes the generated answer and source references
 ```
 
-### Workflow 2: AWS Deployment
-
-```bash
-# 1. Prepare deployment package
-python build_lambda.py
-
-# 2. Upload to S3
-aws s3 cp lambda-function.zip s3://my-bucket/
-
-# 3. Deploy stack
-aws cloudformation deploy \
-  --template-file aws/cloudformation-template.yaml \
-  --stack-name rag-prod \
-  --parameter-overrides S3BucketName=my-bucket \
-  --capabilities CAPABILITY_IAM
-
-# 4. Get endpoint
-API=$(aws cloudformation describe-stacks \
-  --stack-name rag-prod \
-  --query 'Stacks[0].Outputs[?OutputKey==`ApiEndpoint`].OutputValue' \
-  --output text)
-
-# 5. Use the API
-curl -X POST ${API}/query \
-  -H "Content-Type: application/json" \
-  -d '{"query": "What is this about?"}'
-```
-
-### Workflow 3: Docker Development
+### Workflow 2: Docker Development
 
 ```bash
 # 1. Navigate to docker directory
@@ -725,7 +547,7 @@ Approximate performance on local machine (Intel i7, 16GB RAM):
 2. **Implement authentication**: Add JWT tokens to API
 3. **Add caching**: Implement Redis for query results
 4. **Scale vector DB**: Switch to managed Pinecone for production
-5. **Add monitoring**: Implement CloudWatch metrics
+5. **Add monitoring**: Add runtime and request metrics
 6. **Enable fine-tuning**: Create custom embeddings for your domain
 
 ---
@@ -760,9 +582,8 @@ For issues, questions, or suggestions:
 - [Ollama Documentation](https://github.com/ollama/ollama)
 - [FastAPI Documentation](https://fastapi.tiangolo.com)
 - [Chroma Documentation](https://docs.trychroma.com)
-- [AWS Lambda Best Practices](https://docs.aws.amazon.com/lambda/latest/dg/best-practices.html)
 - [RAG Explained](https://research.ibm.com/blog/retrieval-augmented-generation-RAG)
 
 ---
 
-**Made with ❤️ for AI and Cloud enthusiasts**
+**Made with ❤️ for AI builders**

@@ -18,7 +18,7 @@ def main():
     """Main entry point"""
     logger.info(f"Starting RAG application in {config.environment} environment...")
     
-    if config.is_local():
+    if config.is_local() or config.is_docker():
         # Run local API server
         import uvicorn
         from src.api import app

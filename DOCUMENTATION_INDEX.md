@@ -8,7 +8,6 @@
 |----------|---------|------|----------|
 | [QUICKSTART.md](QUICKSTART.md) | Get running in 5 minutes | 5 min | Everyone |
 | [README.md](README.md) | Comprehensive guide | 30 min | Developers |
-| [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md) | Deploy to AWS | 30 min | DevOps/Backend |
 | [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md) | What was built | 15 min | Project Managers |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contribute to project | 10 min | Contributors |
 
@@ -38,7 +37,6 @@
 - Installation guide
 - How to run locally
 - Complete API documentation
-- AWS deployment instructions
 - Docker deployment
 - Testing procedures
 - Configuration reference
@@ -57,33 +55,11 @@
 
 ---
 
-### **3. AWS_DEPLOYMENT.md** ☁️
-**Best for**: Deploying to production on AWS
-- Step-by-step AWS setup
-- CloudFormation deployment
-- API endpoint configuration
-- Testing on AWS
-- Lambda scaling
-- DynamoDB setup
-- Cost estimation
-- Cleanup procedures
-- Advanced configuration (custom domains, WAF)
-
-👉 **Use this for:**
-- Deploying to AWS Lambda
-- Setting up production infrastructure
-- Configuring API Gateway
-- Managing costs
-- Advanced AWS features
-
----
-
-### **4. IMPLEMENTATION_SUMMARY.md** 📋
+### **3. IMPLEMENTATION_SUMMARY.md** 📋
 **Best for**: Project overview and architecture
 - What was built
 - Technology stack
 - How to run locally (quick)
-- AWS deployment (quick)
 - Database choice explanation
 - Performance metrics
 - Features checklist
@@ -98,7 +74,7 @@
 
 ---
 
-### **5. CONTRIBUTING.md** 🤝
+### **4. CONTRIBUTING.md** 🤝
 **Best for**: Contributing code to the project
 - Issue reporting guidelines
 - Pull request process
@@ -121,7 +97,6 @@
 📦 Project Root
 ├── 📄 README.md                    ← Main documentation
 ├── 📄 QUICKSTART.md                ← Fast start guide
-├── 📄 AWS_DEPLOYMENT.md            ← AWS deployment guide
 ├── 📄 IMPLEMENTATION_SUMMARY.md     ← This summary
 ├── 📄 CONTRIBUTING.md              ← Contribution guide
 ├── 📄 DOCUMENTATION_INDEX.md        ← This file
@@ -136,10 +111,6 @@
 │   ├── Dockerfile
 │   └── docker-compose.yml
 │
-├── 📁 aws/                         ← AWS files
-│   ├── cloudformation-template.yaml
-│   └── deploy.sh
-│
 ├── 📁 data/                        ← Data storage
 │   ├── uploads/                    # User documents
 │   ├── chroma_db/                  # Embeddings
@@ -150,8 +121,7 @@
 ├── .env.example                    ← Config template
 ├── requirements.txt                ← Dependencies
 ├── main.py                         ← Run local server
-├── cli.py                          ← CLI tool
-└── build_lambda.py                 ← Build for AWS
+└── cli.py                          ← CLI tool
 ```
 
 ---
@@ -163,23 +133,18 @@
 2. Explore: [README.md](README.md) sections: API Endpoints, Configuration (10 min)
 3. Experiment: Run locally and test endpoints
 
-### **Path 2: DevOps (Want to deploy to AWS)**
-1. Start: [QUICKSTART.md](QUICKSTART.md) (5 min)
-2. Main: [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md) (30 min)
-3. Reference: [README.md](README.md) AWS section for troubleshooting
-
-### **Path 3: Project Manager (Want overview)**
+### **Path 2: Project Manager (Want overview)**
 1. Start: [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md) (15 min)
 2. Architecture: [README.md](README.md) architecture section (5 min)
 3. Understand: Technology choices and database selection
 
-### **Path 4: Contributor (Want to improve)**
+### **Path 3: Contributor (Want to improve)**
 1. Start: [QUICKSTART.md](QUICKSTART.md) (5 min)
 2. Setup: Development environment from [CONTRIBUTING.md](CONTRIBUTING.md)
 3. Reference: [README.md](README.md) project structure
 4. Contribute: Pick an area from CONTRIBUTING.md
 
-### **Path 5: First-Timer (Complete beginner)**
+### **Path 4: First-Timer (Complete beginner)**
 1. Read: [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md) - Overview (5 min)
 2. Follow: [QUICKSTART.md](QUICKSTART.md) - Setup (5 min)
 3. Explore: Interactive API at http://localhost:8000/docs
@@ -194,9 +159,6 @@
 
 ### **How do I run this locally?**
 → [README.md](README.md) → "How to Run Locally" section
-
-### **How do I deploy to AWS?**
-→ [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md)
 
 ### **What are the API endpoints?**
 → [README.md](README.md) → "API Endpoints" section
@@ -235,7 +197,6 @@
 |----------|-------|--------|------|
 | README.md | 700+ | 18 | 30 min |
 | QUICKSTART.md | 100+ | 6 | 5 min |
-| AWS_DEPLOYMENT.md | 450+ | 12 | 30 min |
 | IMPLEMENTATION_SUMMARY.md | 500+ | 15 | 15 min |
 | CONTRIBUTING.md | 80+ | 5 | 10 min |
 
@@ -258,10 +219,6 @@
 - [README.md](README.md) → "Prerequisites" and "Installation"
 - [QUICKSTART.md](QUICKSTART.md) → "Prerequisites"
 
-### **AWS Lambda Deployment**
-- [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md) → Complete guide
-- [README.md](README.md) → "AWS Deployment" section
-
 ### **Vector Databases**
 - [README.md](README.md) → "Database Choices"
 - [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md) → "Database Choice: Chroma"
@@ -277,7 +234,6 @@
 | Get started quickly | QUICKSTART.md | Installation |
 | Run locally | QUICKSTART.md | How to Run Locally |
 | Use Docker | README.md | Docker Deployment |
-| Deploy to AWS | AWS_DEPLOYMENT.md | Step-by-Step |
 | Understand architecture | IMPLEMENTATION_SUMMARY.md | Architecture |
 | Learn API endpoints | README.md | API Endpoints |
 | Configure settings | README.md | Configuration |
@@ -301,7 +257,6 @@
 
 - **Setup Issues**: [QUICKSTART.md](QUICKSTART.md) → Troubleshooting
 - **API Questions**: [README.md](README.md) → API Endpoints
-- **AWS Issues**: [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md) → Troubleshooting
 - **Code Contribution**: [CONTRIBUTING.md](CONTRIBUTING.md)
 - **Architecture Questions**: [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)
 
@@ -312,7 +267,6 @@
 Last Updated: 2024
 - All documentation is current and tested
 - Code examples are functional
-- AWS deployment tested and working
 - Docker configuration validated
 - All links verified
 

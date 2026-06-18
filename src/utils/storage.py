@@ -1,12 +1,10 @@
 """
-File storage abstraction layer supporting local and AWS S3 storage.
+File storage abstraction layer supporting local storage.
 """
 
 import os
 from abc import ABC, abstractmethod
-from typing import List, Optional
-import boto3
-from botocore.exceptions import ClientError
+from typing import List
 from .logger import get_logger
 
 logger = get_logger(__name__)
@@ -114,73 +112,6 @@ class LocalStorage(StorageProvider):
         return os.path.exists(full_path)
 
 
-class S3Storage(StorageProvider):
-    """AWS S3 storage provider"""
-    
-    def __init__(self, bucket_name: str, region: str = "us-east-1"):
-        self.bucket_name = bucket_name
-        self.s3_client = boto3.client('s3', region_name=region)
-    
-    def upload_file(self, file_path: str, key: str) -> bool:
-        """Upload file to S3"""
-        try:
-            self.s3_client.upload_file(file_path, self.bucket_name, key)
-            logger.info(f"File uploaded to S3: s3://{self.bucket_name}/{key}")
-            return True
-        except ClientError as e:
-            logger.error(f"Error uploading file to S3: {e}")
-            return False
-    
-    def download_file(self, key: str, local_path: str) -> bool:
-        """Download file from S3"""
-        try:
-            self.s3_client.download_file(self.bucket_name, key, local_path)
-            logger.info(f"File downloaded from S3: {key}")
-            return True
-        except ClientError as e:
-            logger.error(f"Error downloading file from S3: {e}")
-            return False
-    
-    def delete_file(self, key: str) -> bool:
-        """Delete file from S3"""
-        try:
-            self.s3_client.delete_object(Bucket=self.bucket_name, Key=key)
-            logger.info(f"File deleted from S3: {key}")
-            return True
-        except ClientError as e:
-            logger.error(f"Error deleting file from S3: {e}")
-            return False
-    
-    def list_files(self, prefix: str = "") -> List[str]:
-        """List files in S3 with optional prefix"""
-        try:
-            response = self.s3_client.list_objects_v2(
-                Bucket=self.bucket_name,
-                Prefix=prefix
-            )
-            files = []
-            if 'Contents' in response:
-                files = [obj['Key'] for obj in response['Contents']]
-            return files
-        except ClientError as e:
-            logger.error(f"Error listing files from S3: {e}")
-            return []
-    
-    def file_exists(self, key: str) -> bool:
-        """Check if file exists in S3"""
-        try:
-            self.s3_client.head_object(Bucket=self.bucket_name, Key=key)
-            return True
-        except ClientError:
-            return False
-
-
 def get_storage_provider(storage_type: str, **kwargs) -> StorageProvider:
     """Factory function to get appropriate storage provider"""
-    if storage_type.lower() == "s3":
-        return S3Storage(
-            bucket_name=kwargs.get("bucket_name"),
-            region=kwargs.get("region", "us-east-1")
-        )
-    else:
-        return LocalStorage(base_dir=kwargs.get("base_dir", "./data/uploads"))
+    return LocalStorage(base_dir=kwargs.get("base_dir", "./data/uploads"))
