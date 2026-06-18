@@ -1,0 +1,27 @@
+Introduction to Machine Learning
+
+Machine learning is a subset of artificial intelligence that focuses on the development 
+of computer programs that can learn and improve from experience without being explicitly programmed.
+
+Key Concepts:
+
+1. Supervised Learning
+   - Classification: Predicting categories
+   - Regression: Predicting continuous values
+   - Examples: Email spam detection, house price prediction
+
+2. Unsupervised Learning
+   - Clustering: Grouping similar data points
+   - Dimensionality Reduction: Reducing data complexity
+   - Examples: Customer segmentation, anomaly detection
+
+3. Reinforcement Learning
+   - Agent learns by interacting with environment
+   - Rewards and penalties guide learning
+   - Examples: Game playing, robotics, autonomous driving
+
+Applications:
+- Healthcare: Disease diagnosis, drug discovery
+- Finance: Fraud detection, market analysis
+- Retail: Product recommendations, demand forecasting
+- Manufacturing: Quality control, predictive maintenance

@@ -1,0 +1,26 @@
+# Web Framework
+fastapi==0.137.2
+uvicorn[standard]==0.34.3
+pydantic==2.12.1
+pydantic-settings==2.6.1
+python-multipart==0.0.7
+
+# HTTP
+requests==2.32.4
+
+# Vector Database & ML
+chromadb==0.6.1
+numpy==2.1.3
+
+# AWS
+boto3==1.43.32
+botocore==1.43.32
+
+# Utilities
+python-dotenv==1.0.1
+pypdf==5.0.1
+openpyxl==3.1.2
+xlrd==2.0.1
+
+# Type hints & validation
+typing-extensions==4.14.1
