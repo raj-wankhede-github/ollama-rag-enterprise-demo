@@ -20,6 +20,7 @@ A production-ready Retrieval-Augmented Generation (RAG) application using Ollama
 - [Python 3.13 Notes](#python-313-notes)
 - [Project Structure](#project-structure)
 - [Contributing](#contributing)
+- [Repository Access Control](#repository-access-control)
 - [Troubleshooting](#troubleshooting)
 
 ## Overview
@@ -123,7 +124,7 @@ cp .env.example .env
 
 Edit `.env` as needed, or keep the defaults for local development.
 
-## Local Development
+## Local Deployment
 
 ### Start the API server
 
@@ -450,7 +451,9 @@ Thank you for contributing to the project.
 4. Run tests
 5. Commit with a clear message
 6. Push to your fork
-7. Open a pull request
+7. Open a pull request to this repository
+
+Direct pushes to protected branches in this repository are restricted to the repository owner.
 
 ### Development expectations
 
@@ -468,6 +471,54 @@ Thank you for contributing to the project.
 - More tests
 - UI improvements
 - Authentication support
+
+## Repository Access Control
+
+Use these settings in GitHub to ensure only you (the owner) can push to protected branches and everyone else contributes via forks + pull requests.
+
+### 1. Remove direct write access for others
+
+In GitHub:
+
+1. Open your repository
+2. Go to Settings -> Collaborators and teams (or Manage access)
+3. Remove anyone with Write, Maintain, or Admin unless absolutely required
+
+Note: Public users cannot push unless they have explicit write access. Keeping write access owner-only is the first control.
+
+### 2. Protect main, dev, test, and prod
+
+In GitHub:
+
+1. Go to Settings -> Rules -> Rulesets (recommended) or Branches
+2. Create a branch ruleset targeting:
+  - `main`
+  - `dev`
+  - `test`
+  - `prod`
+3. Enable at minimum:
+  - Require a pull request before merging
+  - Require status checks to pass (optional but recommended)
+  - Block force pushes
+  - Block branch deletion
+  - Restrict updates / restrict who can push: only your GitHub username
+  - Apply restrictions to administrators (so protections are enforced consistently)
+
+### 3. Protect all other branches too
+
+Create a second ruleset with branch target `*` and restrict updates so only your GitHub username can push.
+
+This ensures new branches are also owner-only by default.
+
+### 4. Contribution model for others
+
+Contributors should:
+
+1. Fork this repository
+2. Push changes to their fork
+3. Open a pull request from fork -> this repository
+
+This repository does not accept direct pushes from non-owners.
 
 ## Troubleshooting
 
